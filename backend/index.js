@@ -10,7 +10,7 @@ const ReviewRouters = require("./Routes/Reviews");
 const app = express();
 const port = process.env.PORT || 4000;
 const { db } = require("./config/ConnectDB");
-const cloudinaryConfig = require("./config/Cloudinary");
+
 const path = require("path");
 db.connect((error) => {
   if (error) {
@@ -38,7 +38,6 @@ app.use("/api/reviews", ReviewRouters);
 app.use((req, res, next) => {
   res.status(404).send(jesnd.error({ message: "Route not found" }));
 });
-cloudinaryConfig();
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
 });

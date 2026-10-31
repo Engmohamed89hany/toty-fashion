@@ -18,22 +18,26 @@ const {
   registerValidator,
   loginValidator,
   validateUserId,
+  validateUserList,
   validateUpdateRole,
   validateUpdateUser,
+  validateRefreshTokenBody,
 } = require("../middleware/user.validate");
 const router = express.Router();
 const uploadUserImage = uploader("user").single("image");
 
-router.route("/").get(verifyToken, allowTo, getAllUsers);
-router.route("/update-role").put(verifyToken, allowTo, updateRole);
+router.route("/").get(verifyToken, allowTo, validateUserList, getAllUsers);
+router
+  .route("/update-role")
+  .put(verifyToken, allowTo, validateUpdateRole, updateRole);
 router.route("/register").post(uploadUserImage, registerValidator, registerUser);
 router.route("/login").post(loginValidator, loginUser);
-router.route("/logout").post(logoutUser);
-router.route("/refresh").post(refresh);
+router.route("/logout").post(validateRefreshTokenBody, logoutUser);
+router.route("/refresh").post(validateRefreshTokenBody, refresh);
 router.route("/group-by-role").get(verifyToken, allowTo, usersGroupByRole);
 router
   .route("/:id")
-  .get(verifyToken, allowTo, getUserById)
+  .get(verifyToken, allowTo, validateUserId, getUserById)
   .put(verifyToken, allowTo, uploadUserImage, validateUpdateUser, updateUser)
-  .delete(verifyToken, allowTo, deleteUser);
+  .delete(verifyToken, allowTo, validateUserId, deleteUser);
 module.exports = router;

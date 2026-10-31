@@ -40,9 +40,10 @@ const getAllUsers = AsyncWrapper(async (req, res) => {
   const countQuery = `
     SELECT COUNT(*) AS totalUsers
     FROM users
+    ${whereQuery}
   `;
 
-  db.execute(countQuery, [], (error, countData) => {
+  db.execute(countQuery, queryParams, (error, countData) => {
     if (error) {
       return res.status(500).send(
         jsend.error({
@@ -460,7 +461,7 @@ const deleteUser = AsyncWrapper(async (req, res) => {
 // Logout User
 // =====================================================
 const logoutUser = AsyncWrapper(async (req, res) => {
-  const token = req.cookies.refreshToken || req.body.refreshToken;
+  const token = req.cookies?.refreshToken || req.body?.refreshToken;
 
   if (!token) {
     return res
