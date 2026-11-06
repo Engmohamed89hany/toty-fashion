@@ -22,7 +22,7 @@ db.connect((error) => {
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.1.6:5173"],
+    origin: ["http://localhost:3000", "https://toty-fashion.vercel.app"],
     credentials: true,
   }),
 );

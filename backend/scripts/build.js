@@ -13,6 +13,7 @@ const sourceDirectories = [
 ];
 const sourceFiles = ["index.js"];
 
+fs.cpSync("src", "dist", { recursive: true });
 const collectJavaScriptFiles = (directory) => {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const entryPath = path.join(directory, entry.name);
@@ -43,4 +44,6 @@ for (const file of sourceFiles) {
   }
 }
 
-console.log(`Backend build check passed for ${sourceFiles.length} JavaScript files.`);
+console.log(
+  `Backend build check passed for ${sourceFiles.length} JavaScript files.`,
+);

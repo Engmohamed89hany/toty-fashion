@@ -123,7 +123,7 @@ const getAllProducts = AsyncWrapper(async (req, res) => {
   const skip = (page - 1) * limit;
   const [products] = await db.promise().execute(
     `SELECT products.id, products.name, products.description, products.price, products.discount, products.stock, products.size, products.category_id, category.title
-     FROM products inner join category on products.category_id = category.id ${whereQuery} ORDER BY id DESC LIMIT ? OFFSET ?`,
+     FROM products inner join category on products.category_id = category.id ${whereQuery} ORDER BY products.id DESC LIMIT ? OFFSET ?`,
     [...filterParams, limit, skip],
   );
   const images = await getProductImages(products.map((product) => product.id));
