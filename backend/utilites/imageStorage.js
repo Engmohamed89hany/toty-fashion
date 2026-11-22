@@ -1,60 +1,16 @@
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
-const cloudinary = require("cloudinary").v2;
 
-const imageDirectory = path.join(__dirname, "../images");
+const imageDirectory = process.env.VERCEL
+  ? path.join(os.tmpdir(), "toty-fashion", "images")
+  : path.join(__dirname, "../images");
+fs.mkdirSync(imageDirectory, { recursive: true });
 
-const isCloudinaryConfigured = () => {
-  const config = cloudinary.config();
-  return Boolean(config.cloud_name && config.api_key && config.api_secret);
-};
-
-const getImageReference = (file) =>
-  file.cloudinaryUrl || `/images/${file.filename}`;
-
-const getCloudinaryPublicId = (imageReference) => {
-  if (typeof imageReference !== "string") {
-    return null;
-  }
-
-  let imageUrl;
-  try {
-    imageUrl = new URL(imageReference);
-  } catch {
-    return null;
-  }
-
-  if (!imageUrl.hostname.endsWith(".cloudinary.com")) {
-    return null;
-  }
-
-  const uploadPath = "/image/upload/";
-  const uploadIndex = imageUrl.pathname.indexOf(uploadPath);
-  if (uploadIndex === -1) {
-    return null;
-  }
-
-  const publicId = imageUrl.pathname
-    .slice(uploadIndex + uploadPath.length)
-    .replace(/^v\d+\//, "")
-    .replace(/\.[^/.]+$/, "");
-
-  return publicId ? decodeURIComponent(publicId) : null;
-};
+const getImageReference = (file) => `/images/${file.filename}`;
 
 const deleteStoredImage = async (imageReference) => {
   if (typeof imageReference !== "string" || !imageReference) {
-    return;
-  }
-
-  const publicId = getCloudinaryPublicId(imageReference);
-  if (publicId) {
-    const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "image",
-    });
-    if (!["ok", "not found"].includes(result.result)) {
-      throw new Error(`Cloudinary did not delete image: ${result.result}`);
-    }
     return;
   }
 
@@ -76,7 +32,7 @@ const deleteUploadedFiles = (files, context = "uploaded image") =>
   Promise.all(
     files.map(async (file) => {
       try {
-        await deleteStoredImage(file.cloudinaryUrl || file.filename);
+        await deleteStoredImage(file.filename);
       } catch (error) {
         console.error(`Error deleting ${context}:`, error);
       }
@@ -86,6 +42,6 @@ const deleteUploadedFiles = (files, context = "uploaded image") =>
 module.exports = {
   deleteStoredImage,
   deleteUploadedFiles,
+  getImageDirectory: () => imageDirectory,
   getImageReference,
-  isCloudinaryConfigured,
 };

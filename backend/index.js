@@ -11,7 +11,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 const { db } = require("./config/ConnectDB");
 
-const path = require("path");
+const { getImageDirectory } = require("./utilites/imageStorage");
 const configuredOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
@@ -33,7 +33,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(getImageDirectory()));
 app.get("/api/health", async (req, res) => {
   try {
     await db.promise().query("SELECT 1");
@@ -72,10 +72,7 @@ app.use((error, req, res, next) => {
       : error.code === "LIMIT_FILE_SIZE"
         ? 413
         : 500;
-  const message =
-    statusCode < 500 || error.code === "IMAGE_STORAGE_NOT_CONFIGURED"
-      ? error.message
-      : "Internal server error";
+  const message = statusCode < 500 ? error.message : "Internal server error";
 
   return res.status(statusCode).send(jesnd.error({ message }));
 });

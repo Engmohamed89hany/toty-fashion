@@ -29,13 +29,12 @@ order, before using product reviews, user images, and the product catalog.
 
 ## File uploads
 
-Vercel cannot persist files written to the backend's local `images` directory.
-Configure `CLOUDINARY_URL` in the backend Vercel project's Production and
-Preview environments to enable persistent image uploads. The value is available
-from the Cloudinary console and must be kept secret. The existing `cloudinary`
-dependency is used automatically when this variable is present.
+Uploads are stored directly in the backend's `images` directory during local
+development. On Vercel, uploads use `/tmp/toty-fashion/images`, since the
+deployed application directory is read-only. The `/images` route serves files
+from the same directory.
 
-Without Cloudinary configuration, uploads on Vercel return HTTP 503 with a
-configuration message instead of failing with an opaque HTTP 500. Local
-development continues to use the `images` directory when Cloudinary is not
-configured.
+Vercel `/tmp` storage is temporary and instance-local: files can disappear when
+the function instance is recycled and may not be available to another instance.
+This option requires no external image-storage credentials, but is not suitable
+for images that must persist.
