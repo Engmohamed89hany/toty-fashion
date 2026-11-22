@@ -65,9 +65,19 @@ app.use((error, req, res, next) => {
   }
 
   console.error("Unhandled API error:", error);
-  return res
-    .status(error.statusCode >= 400 && error.statusCode < 500 ? error.statusCode : 500)
-    .send(jesnd.error({ message: "Internal server error" }));
+  const errorStatus = error.statusCode ?? error.status;
+  const statusCode =
+    Number.isInteger(errorStatus) && errorStatus >= 400 && errorStatus <= 599
+      ? errorStatus
+      : error.code === "LIMIT_FILE_SIZE"
+        ? 413
+        : 500;
+  const message =
+    statusCode < 500 || error.code === "IMAGE_STORAGE_NOT_CONFIGURED"
+      ? error.message
+      : "Internal server error";
+
+  return res.status(statusCode).send(jesnd.error({ message }));
 });
 
 if (require.main === module) {

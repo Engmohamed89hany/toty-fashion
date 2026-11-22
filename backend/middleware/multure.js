@@ -46,6 +46,7 @@ const unavailableStorage = {
       "Image storage is not configured. Set CLOUDINARY_URL in the backend environment.",
     );
     error.statusCode = 503;
+    error.code = "IMAGE_STORAGE_NOT_CONFIGURED";
     callback(error);
   },
   _removeFile(req, file, callback) {
@@ -84,7 +85,9 @@ function uploader(name) {
         return;
       }
 
-      cb(new Error("Only JPG, PNG, and WEBP images are allowed"));
+      const error = new Error("Only JPG, PNG, and WEBP images are allowed");
+      error.statusCode = 400;
+      cb(error);
     },
   });
 }
