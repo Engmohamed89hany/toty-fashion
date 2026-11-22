@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import { useParams, useRouter } from "next/navigation";
 import * as Yup from "yup";
 import api from "@/lib/api";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 interface ICategoryForm {
   title: string;
@@ -17,8 +18,6 @@ interface IFormStatus {
   message: string;
 }
 
-const API_URL = "http://localhost:4000/api";
-const BASE_URL = "http://localhost:4000";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -72,11 +71,7 @@ const getCategoryImageUrl = (image?: string | null) => {
     return "https://placehold.co/100x100/f3f4f6/1f2937?text=No+Image";
   }
 
-  if (image.startsWith("http://") || image.startsWith("https://")) {
-    return image;
-  }
-
-  return `${BASE_URL}/images/${image}`;
+  return getApiAssetUrl(image);
 };
 
 const UpdateCategoryPage = () => {

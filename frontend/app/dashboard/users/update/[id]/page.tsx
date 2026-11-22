@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import * as Yup from "yup";
 import api from "@/lib/api";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 interface IUserForm {
   name: string;
@@ -164,9 +165,7 @@ const UpdateUserPage = () => {
             role: user.role,
             image: null,
           });
-          setImagePreview(
-            user.image ? `http://localhost:4000/images/${user.image}` : null,
-          );
+          setImagePreview(user.image ? getApiAssetUrl(user.image) : null);
         }
       } catch (error) {
         if (active) {

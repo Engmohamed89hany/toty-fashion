@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 export interface IStoreProduct {
   id: number;
@@ -14,16 +15,11 @@ export interface IStoreProduct {
   images: Array<{ id: number; imageurl: string }>;
 }
 
-const API_ORIGIN = "http://localhost:4000";
-
 const getImageUrl = (imageUrl?: string) => {
   if (!imageUrl) {
     return "/assests/hero.jpg";
   }
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
-  return `${API_ORIGIN}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  return getApiAssetUrl(imageUrl);
 };
 
 const formatPrice = (price: number) =>

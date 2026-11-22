@@ -54,5 +54,12 @@ if (sslEnabled) {
   }
 }
 
-const db = mysql2.createConnection(connectionOptions);
+const db = mysql2.createPool({
+  ...connectionOptions,
+  connectionLimit: Number(process.env.DATABASE_CONNECTION_LIMIT) || 2,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+  waitForConnections: true,
+  queueLimit: 0,
+});
 module.exports = { db };

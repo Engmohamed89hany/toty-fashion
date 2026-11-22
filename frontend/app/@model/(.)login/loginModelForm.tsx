@@ -9,6 +9,7 @@ import { MdOutlineEmail } from "react-icons/md";
 import Close from "../Close";
 import Link from "next/link";
 import PasswordInput from "@/app/components/PasswordInput";
+import api, { setAccessToken, setUserRole } from "@/lib/api";
 
 export const loginSchema = Yup.object({
   email: Yup.string()
@@ -38,25 +39,22 @@ const LoginModelForm = () => {
     validationSchema: loginSchema,
     onSubmit: async (values) => {
       try {
-        const res = await axios.post("http://localhost:4000/api/users/login", {
+        const res = await api.post("/users/login", {
           email: values.email,
           password: values.password,
         });
         const token = res.data.data.accessToken;
         const role = res.data.data.role;
-        document.cookie = `token=${token};path=/`;
-        document.cookie = `role=${role};path=/`;
-        window.location.pathname = "/";
-        console.log(res.data.data);
+        setAccessToken(token);
+        setUserRole(role);
+        router.replace("/");
       } catch (err) {
-        console.log(err);
-
         if (axios.isAxiosError(err) && err.response?.status === 401) {
           formik.setFieldError("password", "invaild email or password");
           return;
         }
 
-        throw new Error("interinal server error with status 500");
+        formik.setStatus("تعذر تسجيل الدخول. يرجى المحاولة مرة أخرى.");
       }
     },
   });

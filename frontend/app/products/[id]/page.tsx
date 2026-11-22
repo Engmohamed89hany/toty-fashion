@@ -3,15 +3,14 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { FaArrowRight, FaStar } from "react-icons/fa";
-import ProductCard, { type IStoreProduct } from "../ProductCard";
+import { type IStoreProduct } from "../ProductCard";
+import CategoryProductCarousel from "./CategoryProductCarousel";
 import ReviewSection, { type IProductReview } from "./ReviewSection";
 import {
   createOpenGraphMetadata,
   createTwitterMetadata,
 } from "@/lib/seo";
-
-const API_URL = "http://localhost:4000/api";
-const API_ORIGIN = "http://localhost:4000";
+import { API_BASE_URL, getApiAssetUrl } from "@/lib/api-config";
 
 interface IApiResponse<T> {
   data?: T;
@@ -41,7 +40,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   try {
-    const response = await fetch(`${API_URL}/products/${encodeURIComponent(id)}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(id)}`, {
       cache: "no-store",
     });
     if (!response.ok) {
@@ -92,10 +91,7 @@ const getImageUrl = (imageUrl?: string) => {
   if (!imageUrl) {
     return "/assests/hero.jpg";
   }
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
-  return `${API_ORIGIN}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  return getApiAssetUrl(imageUrl);
 };
 
 const formatPrice = (price: number) =>
@@ -113,7 +109,7 @@ export default async function ProductDetailsPage({
 
   let product: IProductDetails | undefined;
   try {
-    const response = await fetch(`${API_URL}/products/${encodeURIComponent(id)}`, {
+    const response = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(id)}`, {
       cache: "no-store",
     });
     if (response.status === 404) {
@@ -142,11 +138,11 @@ export default async function ProductDetailsPage({
   }
 
   const [reviewsResult, relatedProductsResult] = await Promise.allSettled([
-    fetch(`${API_URL}/products/${product.id}/reviews?page=1&limit=20`, {
+    fetch(`${API_BASE_URL}/products/${product.id}/reviews?page=1&limit=20`, {
       cache: "no-store",
     }),
     fetch(
-      `${API_URL}/products?page=1&limit=5&category_id=${product.category_id}`,
+      `${API_BASE_URL}/products?page=1&limit=5&category_id=${product.category_id}`,
       { cache: "no-store" },
     ),
   ]);
@@ -342,11 +338,7 @@ export default async function ProductDetailsPage({
               عرض كل التصنيف
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} product={relatedProduct} />
-            ))}
-          </div>
+          <CategoryProductCarousel products={relatedProducts} />
         </section>
       )}
     </main>

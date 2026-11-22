@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { HiBars3BottomLeft } from "react-icons/hi2";
 import { IoIosSearch } from "react-icons/io";
+import { API_BASE_URL, getApiAssetUrl } from "@/lib/api-config";
 
 interface ILinks {
   name: string;
@@ -25,17 +26,11 @@ interface ISearchResponse {
   };
 }
 
-const API_URL = "http://localhost:4000/api";
-const API_ORIGIN = "http://localhost:4000";
-
 const getImageUrl = (imageUrl?: string) => {
   if (!imageUrl) {
     return "/assests/hero.jpg";
   }
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
-  return `${API_ORIGIN}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  return getApiAssetUrl(imageUrl);
 };
 
 const SearchForm = ({ inputId }: { inputId: string }) => {
@@ -63,7 +58,7 @@ const SearchForm = ({ inputId }: { inputId: string }) => {
           search: trimmedQuery.slice(0, 100),
         });
         const response = await fetch(
-          `${API_URL}/products?${searchParams.toString()}`,
+          `${API_BASE_URL}/products?${searchParams.toString()}`,
           { signal: controller.signal },
         );
         if (!response.ok) {

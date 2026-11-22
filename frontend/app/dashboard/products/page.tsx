@@ -6,6 +6,7 @@ import { MdAdd, MdInventory2 } from "react-icons/md";
 import DeleteRow from "../components/DeleteRow";
 import api from "@/lib/api";
 import { ImSearch } from "react-icons/im";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 export const metadata = {
   title: "لوحة التحكم | المنتجات",
@@ -61,11 +62,7 @@ const getImageUrl = (imageUrl?: string) => {
     return "/assests/hero.jpg";
   }
 
-  if (/^https?:\/\//i.test(imageUrl)) {
-    return imageUrl;
-  }
-
-  return `http://localhost:4000${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  return getApiAssetUrl(imageUrl);
 };
 
 const formatPrice = (price: number | string) =>

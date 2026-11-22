@@ -18,9 +18,7 @@ import {
   createOpenGraphMetadata,
   createTwitterMetadata,
 } from "@/lib/seo";
-
-const API_URL = "http://localhost:4000/api";
-const API_ORIGIN = "http://localhost:4000";
+import { API_BASE_URL, getApiAssetUrl } from "@/lib/api-config";
 
 export const metadata: Metadata = {
   title: "أزياء نسائية راقية",
@@ -80,7 +78,7 @@ interface IProductListing {
 
 const getListing = async <T,>(endpoint: string): Promise<T | null> => {
   try {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       cache: "no-store",
     });
     if (!response.ok) {
@@ -102,13 +100,7 @@ const getImageUrl = (image?: string | null) => {
   if (!image) {
     return "/assests/hero.jpg";
   }
-  if (/^https?:\/\//i.test(image)) {
-    return image;
-  }
-  if (image.startsWith("/")) {
-    return `${API_ORIGIN}${image}`;
-  }
-  return `${API_ORIGIN}/images/${image}`;
+  return getApiAssetUrl(image);
 };
 
 const formatPrice = (price: number) =>

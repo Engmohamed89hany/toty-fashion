@@ -6,8 +6,8 @@ import {
   createOpenGraphMetadata,
   createTwitterMetadata,
 } from "@/lib/seo";
+import { API_BASE_URL } from "@/lib/api-config";
 
-const API_URL = "http://localhost:4000/api";
 const PAGE_SIZE = 12;
 
 interface ICategory {
@@ -100,8 +100,8 @@ export default async function ProductsPage({
   let productsError = false;
 
   const [categoryResult, productResult] = await Promise.allSettled([
-    fetch(`${API_URL}/categories?page=1&limit=100`, { cache: "no-store" }),
-    fetch(`${API_URL}/products?${query}`, { cache: "no-store" }),
+    fetch(`${API_BASE_URL}/categories?page=1&limit=100`, { cache: "no-store" }),
+    fetch(`${API_BASE_URL}/products?${query}`, { cache: "no-store" }),
   ]);
 
   if (categoryResult.status === "fulfilled" && categoryResult.value.ok) {

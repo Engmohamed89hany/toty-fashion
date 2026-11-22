@@ -9,6 +9,7 @@ import Image from "next/image";
 
 import DeleteRow from "../components/DeleteRow";
 import api from "@/lib/api";
+import { getApiAssetUrl } from "@/lib/api-config";
 // ===================== MetaData ================
 export const metadata = {
   title: "إدارة المستخدمين | لوحة التحكم  ",
@@ -247,7 +248,7 @@ const UsersPage = async ({
                   <td className="p-3 flex items-center gap-x-2">
                     {user.image ? (
                       <Image
-                        src={`http://localhost:4000/images/${user.image}`}
+                        src={getApiAssetUrl(user.image)}
                         alt={`صورة ${user.name}`}
                         width={40}
                         height={40}

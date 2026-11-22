@@ -119,7 +119,7 @@ const products = [
 ];
 
 const seedDemoCatalog = async () => {
-  const connection = db.promise();
+  const connection = await db.promise().getConnection();
   const categoryIds = new Map();
   let insertedCategories = 0;
   let insertedProducts = 0;
@@ -195,7 +195,8 @@ const seedDemoCatalog = async () => {
     await connection.rollback();
     throw error;
   } finally {
-    await connection.end();
+    connection.release();
+    await db.promise().end();
   }
 };
 

@@ -8,6 +8,7 @@ import { MdAdd, MdCategory } from "react-icons/md";
 import DeleteRow from "../components/DeleteRow";
 import api from "@/lib/api";
 import { ImSearch } from "react-icons/im";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 export const metadata = {
   title: "لوحة التحكم | التصنيفات",
@@ -55,11 +56,7 @@ const getCategoryImageUrl = (image?: string | null) => {
     return "/assests/hero.jpg";
   }
 
-  if (image.startsWith("http://") || image.startsWith("https://")) {
-    return image;
-  }
-
-  return `http://localhost:4000/images/${image}`;
+  return getApiAssetUrl(image);
 };
 
 const formatDate = (date?: string) => {

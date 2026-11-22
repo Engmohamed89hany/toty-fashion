@@ -6,8 +6,7 @@ import axios from "axios";
 import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { FaStar } from "react-icons/fa";
 import api, { getAccessToken } from "@/lib/api";
-
-const API_ORIGIN = "http://localhost:4000";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 export interface IProductReview {
   id: number;
@@ -69,10 +68,7 @@ const getAvatarUrl = (image?: string | null) => {
   if (!image) {
     return null;
   }
-  if (/^https?:\/\//i.test(image)) {
-    return image;
-  }
-  return `${API_ORIGIN}${image.startsWith("/") ? "" : "/images/"}${image}`;
+  return getApiAssetUrl(image);
 };
 
 const formatDate = (value: string) => {

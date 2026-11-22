@@ -9,6 +9,7 @@ import axios from "axios";
 import api from "@/lib/api";
 import { MdArrowBack, MdClose, MdImage } from "react-icons/md";
 import Link from "next/link";
+import { getApiAssetUrl } from "@/lib/api-config";
 
 interface ICategory {
   id: number;
@@ -68,8 +69,6 @@ interface IApiError {
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const MAX_IMAGE_COUNT = 5;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const API_ORIGIN = "http://localhost:4000";
-
 const productSchema = Yup.object({
   name: Yup.string()
     .trim()
@@ -129,7 +128,7 @@ const getImageUrl = (imageUrl: string) => {
     return imageUrl;
   }
 
-  return `${API_ORIGIN}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  return getApiAssetUrl(imageUrl);
 };
 
 const getErrorMessage = (error: unknown): string => {

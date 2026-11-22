@@ -1,6 +1,5 @@
 import axios, { type AxiosRequestConfig } from "axios";
-
-const API_BASE_URL = "http://localhost:4000/api";
+import { API_BASE_URL } from "./api-config";
 const ACCESS_TOKEN_COOKIE = "token";
 
 export const getAccessToken = (): string => {
@@ -25,6 +24,14 @@ export const setAccessToken = (token: string) => {
   }
 
   document.cookie = `${ACCESS_TOKEN_COOKIE}=${encodeURIComponent(token)}; path=/; SameSite=Lax`;
+};
+
+export const setUserRole = (role: string) => {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.cookie = `role=${encodeURIComponent(role)}; path=/; SameSite=Lax`;
 };
 
 export const clearAccessToken = () => {
