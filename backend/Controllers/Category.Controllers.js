@@ -1,20 +1,16 @@
-const fs = require("fs");
-const path = require("path");
 const jsend = require("jsend");
 const AsyncWrapper = require("../middleware/Wrapper");
 const { db } = require("../config/ConnectDB");
+const {
+  deleteStoredImage,
+  deleteUploadedFiles,
+  getImageReference,
+} = require("../utilites/imageStorage");
 
-const deleteImageFile = (imageName) => {
-  if (!imageName) return;
-
-  const imagePath = path.join(__dirname, "../images", imageName);
-
-  fs.unlink(imagePath, (error) => {
-    if (error && error.code !== "ENOENT") {
-      console.error("Error deleting category image:", error);
-    }
+const deleteImageFile = (imageReference) =>
+  deleteStoredImage(imageReference).catch((error) => {
+    console.error("Error deleting category image:", error);
   });
-};
 
 const getAllCategories = AsyncWrapper(async (req, res) => {
   const parsePositiveInteger = (value, fallback, maximum = Number.MAX_SAFE_INTEGER) => {
@@ -85,12 +81,15 @@ const getCategoryById = AsyncWrapper(async (req, res) => {
 });
 const createCategory = AsyncWrapper(async (req, res) => {
   const { title, description } = req.body;
-  const image = req.file ? req.file.filename : null;
+  const image = req.file ? getImageReference(req.file) : null;
   const query =
     "INSERT INTO category (title, decription, image) VALUES (?, ?, ?)";
   db.query(query, [title, description, image], (error, results) => {
     if (error) {
       console.error("Error creating category:", error);
+      if (req.file) {
+        void deleteUploadedFiles([req.file], "failed category upload");
+      }
       return res
         .status(500)
         .json(jsend.error({ message: "Internal server error" }));
@@ -103,7 +102,7 @@ const createCategory = AsyncWrapper(async (req, res) => {
 const updateCategory = AsyncWrapper(async (req, res) => {
   const categoryId = req.params.id;
   const { title, description } = req.body;
-  const newImage = req.file ? req.file.filename : null;
+  const newImage = req.file ? getImageReference(req.file) : null;
 
   db.query(
     "SELECT * FROM category WHERE id = ?",
@@ -111,6 +110,9 @@ const updateCategory = AsyncWrapper(async (req, res) => {
     (error, results) => {
       if (error) {
         console.error("Error fetching category for update:", error);
+        if (req.file) {
+          void deleteUploadedFiles([req.file], "failed category update upload");
+        }
         return res
           .status(500)
           .json(jsend.error({ message: "Internal server error" }));
@@ -119,6 +121,9 @@ const updateCategory = AsyncWrapper(async (req, res) => {
       const oldCategory = results[0];
 
       if (!oldCategory) {
+        if (req.file) {
+          void deleteUploadedFiles([req.file], "unused category update upload");
+        }
         return res
           .status(404)
           .json(jsend.error({ message: "Category not found" }));
@@ -134,6 +139,9 @@ const updateCategory = AsyncWrapper(async (req, res) => {
         (updateError, updateResults) => {
           if (updateError) {
             console.error("Error updating category:", updateError);
+            if (req.file) {
+              void deleteUploadedFiles([req.file], "failed category update upload");
+            }
             return res
               .status(500)
               .json(jsend.error({ message: "Internal server error" }));
@@ -146,7 +154,7 @@ const updateCategory = AsyncWrapper(async (req, res) => {
           }
 
           if (newImage && oldCategory.image && oldCategory.image !== newImage) {
-            deleteImageFile(oldCategory.image);
+            void deleteImageFile(oldCategory.image);
           }
 
           return res.status(200).json(
@@ -201,7 +209,7 @@ const deleteCategory = AsyncWrapper(async (req, res) => {
               .json(jsend.error({ message: "Category not found" }));
           }
 
-          deleteImageFile(imageName);
+          void deleteImageFile(imageName);
 
           return res
             .status(200)

@@ -3,10 +3,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { generateToken, refreshToken } = require("../utilites/Token");
 const jsend = require("jsend");
-const fs = require("fs");
-const path = require("path");
 const AsyncWrapper = require("../middleware/Wrapper");
 const { db } = require("../config/ConnectDB");
+const {
+  deleteStoredImage,
+  getImageReference,
+} = require("../utilites/imageStorage");
 
 // =====================================================
 // Get All Users
@@ -160,21 +162,14 @@ const updateUser = AsyncWrapper(async (req, res) => {
         phone || null,
         address?.trim() || "",
         role,
-        req.file?.filename ?? users[0].image,
+        req.file ? getImageReference(req.file) : users[0].image,
         userId,
       ],
     );
 
   if (req.file && users[0].image) {
-    const oldImagePath = path.join(
-      __dirname,
-      "../images",
-      path.basename(users[0].image),
-    );
-    fs.unlink(oldImagePath, (error) => {
-      if (error && error.code !== "ENOENT") {
-        console.error("Error deleting previous user image:", error);
-      }
+    await deleteStoredImage(users[0].image).catch((error) => {
+      console.error("Error deleting previous user image:", error);
     });
   }
 
@@ -225,7 +220,7 @@ const registerUser = AsyncWrapper(async (req, res) => {
       phone,
       req.body.address || "الصنافين",
       hashedPassword,
-      req.file?.filename ?? null,
+      req.file ? getImageReference(req.file) : null,
     ]);
   const accessToken = await generateToken({
     userId: newUserResult.insertId,

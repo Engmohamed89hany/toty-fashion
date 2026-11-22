@@ -1,8 +1,11 @@
-const fs = require("fs");
-const path = require("path");
 const jsend = require("jsend");
 const AsyncWrapper = require("../middleware/Wrapper");
 const { db } = require("../config/ConnectDB");
+const {
+  deleteStoredImage,
+  deleteUploadedFiles,
+  getImageReference,
+} = require("../utilites/imageStorage");
 
 const parsePositiveInteger = (
   value,
@@ -53,16 +56,6 @@ const groupImagesByProduct = (images) => {
   return imagesByProduct;
 };
 
-const deleteUploadedFiles = (files) => {
-  for (const file of files) {
-    fs.unlink(path.join(__dirname, "../images", file.filename), (error) => {
-      if (error && error.code !== "ENOENT") {
-        console.error("Error deleting uploaded product image:", error);
-      }
-    });
-  }
-};
-
 const insertProductImages = async (productId, files) => {
   if (files.length === 0) {
     return [];
@@ -71,7 +64,7 @@ const insertProductImages = async (productId, files) => {
   const values = files.map(() => "(?, ?)").join(", ");
   const params = files.flatMap((file) => [
     productId,
-    `/images/${file.filename}`,
+    getImageReference(file),
   ]);
   await db
     .promise()
@@ -433,10 +426,12 @@ const deleteProduct = AsyncWrapper(async (req, res) => {
     return res.status(404).send(jsend.error({ message: "Product not found" }));
   }
 
-  deleteUploadedFiles(
-    images
-      .map((image) => path.basename(image.imageurl))
-      .map((filename) => ({ filename })),
+  await Promise.all(
+    images.map((image) =>
+      deleteStoredImage(image.imageurl).catch((error) => {
+        console.error("Error deleting product image:", error);
+      }),
+    ),
   );
   return res
     .status(200)
